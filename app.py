@@ -1,6 +1,7 @@
 import base64
 import streamlit as st
 from PyPDF2 import PdfReader, PdfWriter
+from io import BytesIO
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting, Part
 from google.oauth2 import service_account
@@ -18,7 +19,7 @@ def upload_pdfs():
     uploaded_files = st.file_uploader("Upload PDF files", type=['pdf'], accept_multiple_files=True)
     return uploaded_files
 
-# Function to merge PDFs
+# Function to merge PDFs and return as base64 string
 def merge_pdfs(pdf_files):
     pdf_writer = PdfWriter()
     for pdf_file in pdf_files:
@@ -26,8 +27,13 @@ def merge_pdfs(pdf_files):
         for page_num in range(len(pdf_reader.pages)):
             pdf_writer.add_page(pdf_reader.pages[page_num])
 
-    # Store merged PDF in memory without writing to disk
-    merged_pdf_base64 = base64.b64encode(pdf_writer.write_to_bytes()).decode('utf-8')
+    # Store merged PDF in memory using BytesIO
+    merged_pdf_io = BytesIO()
+    pdf_writer.write(merged_pdf_io)
+    merged_pdf_io.seek(0)
+
+    # Convert merged PDF to base64
+    merged_pdf_base64 = base64.b64encode(merged_pdf_io.read()).decode('utf-8')
     return merged_pdf_base64
 
 # Function to generate text from the merged PDF using Gemini
