@@ -9,7 +9,7 @@ from google.oauth2 import service_account
 # Initialize Vertex AI and the model
 def init_vertex_ai():
     credentials = service_account.Credentials.from_service_account_file(
-        'path/to/your/service_account.json'  # Update with the path to your credentials
+        'mlai-rnd-aiml-f785c0229f8d.json'  
     )
     vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
 
