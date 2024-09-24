@@ -9,13 +9,21 @@ from google.oauth2 import service_account
 # Initialize the Vertex AI and Gemini model
 def init_vertex_ai():
     try:
+        SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
         credentials = service_account.Credentials.from_service_account_file(
-            'mlai-rnd-aiml-f785c0229f8d.json'
+            'mlai-rnd-aiml-f785c0229f8d.json',
+            scopes=SCOPES
         )
+        
         vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
         st.success("Vertex AI initialized successfully.")
+
+        # Test authentication
+        credentials.refresh(Request())
+        st.success("Authentication successful.")
     except Exception as e:
         st.error(f"Error initializing Vertex AI: {e}")
+
 
 # Function to upload files in Streamlit
 def upload_pdfs():
