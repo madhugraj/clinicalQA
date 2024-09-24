@@ -60,7 +60,7 @@ def generate_text_from_pdf(document_base64):
 
 # Streamlit app
 def main():
-    st.title("PDF Merger and Chatbot")
+    st.title("Clinical A&A Chatbot")
     
     # Initialize Vertex AI
     init_vertex_ai()
