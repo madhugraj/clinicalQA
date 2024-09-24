@@ -1,10 +1,12 @@
 import base64
-import io
+import os
 from PyPDF2 import PdfReader, PdfWriter
-import streamlit as st
+from google.colab import files
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting, Part
 from google.oauth2 import service_account
+from google.auth.transport.requests import Request  # Import Request
+import streamlit as st  # Import Streamlit for the app
 
 # Initialize the Vertex AI and Gemini model
 def init_vertex_ai():
@@ -24,34 +26,30 @@ def init_vertex_ai():
     except Exception as e:
         st.error(f"Error initializing Vertex AI: {e}")
 
-
-# Function to upload files in Streamlit
+# Function to upload files in Colab
 def upload_pdfs():
-    st.write("Upload exactly 2 PDF files to merge and extract text.")
-    uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
-    if uploaded_files and len(uploaded_files) == 2:
-        return uploaded_files
-    else:
-        st.warning("Please upload exactly 2 PDF files.")
-        return None
+    st.write("Please upload your PDFs (you can select multiple files)")
+    uploaded = files.upload()  # Allow multiple files to be selected in one go
+    file_paths = []
+    for file_name in uploaded.keys():
+        file_paths.append(f"/content/{file_name}")
+    st.success("PDFs uploaded successfully!")
+    return file_paths
 
-# Function to merge two PDFs in memory
+# Function to merge two PDFs
 def merge_pdfs(pdf_files):
     pdf_writer = PdfWriter()
     for pdf_file in pdf_files:
         pdf_reader = PdfReader(pdf_file)
         for page_num in range(len(pdf_reader.pages)):
             pdf_writer.add_page(pdf_reader.pages[page_num])
-    
-    # Write the PDF to bytes instead of saving it
-    output_pdf_stream = io.BytesIO()
-    pdf_writer.write(output_pdf_stream)
-    output_pdf_stream.seek(0)  # Reset stream position to the beginning
-    return output_pdf_stream
+
+    # Write to a bytes object instead of a file
+    merged_pdf_bytes = pdf_writer.write_to_bytes()
+    return merged_pdf_bytes
 
 # Function to read PDF as base64
-def read_pdf_as_base64(pdf_stream):
-    pdf_bytes = pdf_stream.read()
+def read_pdf_as_base64(pdf_bytes):
     return base64.b64encode(pdf_bytes).decode('utf-8')
 
 # Function to generate text from the merged PDF using Gemini
@@ -103,32 +101,6 @@ def live_chat_with_bot(extracted_text):
         )
         st.write(f"Bot: {response.text}")
 
-# Vertex AI Configuration
-generation_config = {
-    "max_output_tokens": 8192,
-    "temperature": 1,
-    "top_p": 0.95,
-}
-
-safety_settings = [
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold=SafetySetting.HarmBlockThreshold.OFF
-    ),
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold=SafetySetting.HarmBlockThreshold.OFF
-    ),
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold=SafetySetting.HarmBlockThreshold.OFF
-    ),
-    SafetySetting(
-        category=SafetySetting.HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold=SafetySetting.HarmBlockThreshold.OFF
-    ),
-]
-
 # Main function to upload, merge, extract text, and query the chatbot
 def main():
     # Initialize Vertex AI
@@ -137,23 +109,25 @@ def main():
     # Upload the PDF files
     pdf_files = upload_pdfs()
 
-    if pdf_files:
-        # Merge the uploaded PDFs in memory
-        merged_pdf_stream = merge_pdfs(pdf_files)
+    if len(pdf_files) == 2:
+        # Merge the uploaded PDFs
+        merged_pdf_bytes = merge_pdfs(pdf_files)
 
         # Read the merged PDF as base64
-        merged_pdf_base64 = read_pdf_as_base64(merged_pdf_stream)
+        merged_pdf_base64 = read_pdf_as_base64(merged_pdf_bytes)
 
         # Generate text from the merged PDF using Gemini
         st.write("Extracting text from the merged PDF...")
         extracted_text = generate_text_from_pdf(merged_pdf_base64)
 
         st.write("Extracted Text from Merged PDF:")
-        st.write(extracted_text)
+        st.text_area("Extracted Text", value=extracted_text, height=300)
 
         # Start live chat with the chatbot using the extracted text
         live_chat_with_bot(extracted_text)
+    else:
+        st.error("Please upload exactly 2 PDF files.")
 
-# Run the app
+# Execute the main function
 if __name__ == "__main__":
     main()
