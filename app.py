@@ -36,7 +36,7 @@ safety_settings = [
 def init_vertex_ai():
     try:
         credentials = service_account.Credentials.from_service_account_file(
-            'your_service_account_key.json'
+            'mlai-rnd-aiml-f785c0229f8d.json'
         )
         vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
         st.write("Vertex AI Initialization Debug")
