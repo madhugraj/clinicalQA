@@ -34,3 +34,18 @@ def init_vertex_ai():
     except Exception as e:
         st.error(f"Error initializing Vertex AI: {e}")
 
+
+
+def main():
+    st.title("Vertex AI Initialization Debug")
+
+    # Initialize Vertex AI and check for errors in loading the credentials
+    init_vertex_ai()
+
+    # You can include the rest of your app logic here once the credentials are validated
+    st.write("Continue with the rest of the app...")
+
+if __name__ == "__main__":
+    main()
+
+
