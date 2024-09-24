@@ -1,4 +1,3 @@
 streamlit
 PyPDF2
-google-auth
-vertex-ai
+google-cloud-aiplatform
