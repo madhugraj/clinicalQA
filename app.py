@@ -1,14 +1,22 @@
 import streamlit as st
 import base64
-import os
 from PyPDF2 import PdfReader, PdfWriter
 from io import BytesIO
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part, SafetySetting
+from google.oauth2 import service_account
+
+# Function to initialize the Vertex AI and Gemini model
+def init_vertex_ai():
+    credentials = service_account.Credentials.from_service_account_file(
+        'mlai-rnd-aiml-f785c0229f8d.json'
+    )
+    vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
 
 # Function to upload PDF files
 def upload_pdfs():
-    uploaded_files = st.file_uploader("Upload PDF files", type=["pdf"], accept_multiple_files=True)
+    st.write("Please upload your PDFs (you can select multiple files)")
+    uploaded_files = st.file_uploader("Upload PDF files", type=['pdf'], accept_multiple_files=True)
     return uploaded_files
 
 # Function to merge PDFs
@@ -47,55 +55,41 @@ def generate_text_from_pdf(document_base64):
 
     return extracted_text
 
-# Function to initialize the Vertex AI and Gemini model
-def init_vertex_ai(credentials_path):
-    credentials = service_account.Credentials.from_service_account_file(credentials_path)
-    vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
-
 # Streamlit app
 def main():
-    st.title("PDF Merger and Chatbot")
+    st.title("Clinical Q&A Bot")
     
-    # Upload the service account JSON file
-    credentials_file = st.file_uploader("mlai-rnd-aiml-f785c0229f8d.json", type=["json"])
+    # Initialize Vertex AI
+    init_vertex_ai()
+
+    pdf_files = upload_pdfs()
     
-    if credentials_file is not None:
-        with open("service_account.json", "wb") as f:
-            f.write(credentials_file.getbuffer())
+    if st.button("Merge and Extract Text"):
+        if len(pdf_files) == 2:
+            # Merge PDFs and extract text
+            merged_pdf_stream = merge_pdfs(pdf_files)
 
-        # Initialize Vertex AI
-        init_vertex_ai("service_account.json")
+            # Read merged PDF as base64
+            merged_pdf_base64 = base64.b64encode(merged_pdf_stream.read()).decode('utf-8')
 
-        pdf_files = upload_pdfs()
-        
-        if st.button("Merge and Extract Text"):
-            if len(pdf_files) == 2:
-                # Merge PDFs and extract text
-                merged_pdf_stream = merge_pdfs(pdf_files)
+            st.write("Extracting text from the merged PDF...")
+            extracted_text = generate_text_from_pdf(merged_pdf_base64)
+            st.subheader("Extracted Text:")
+            st.write(extracted_text)
 
-                # Read merged PDF as base64
-                merged_pdf_base64 = base64.b64encode(merged_pdf_stream.read()).decode('utf-8')
-
-                st.write("Extracting text from the merged PDF...")
-                extracted_text = generate_text_from_pdf(merged_pdf_base64)
-                st.subheader("Extracted Text:")
-                st.write(extracted_text)
-
-                # Set up chat
-                chat = GenerativeModel("gemini-1.5-flash-001").start_chat()
-                question = st.text_input("Ask a question based on the extracted text:")
-                if st.button("Send"):
-                    response = chat.send_message(
-                        [extracted_text, question],
-                        generation_config=generation_config,
-                        safety_settings=safety_settings
-                    )
-                    st.subheader("Chatbot Response:")
-                    st.write(response)
-            else:
-                st.warning("Please upload exactly 2 PDF files.")
-    else:
-        st.warning("Please upload your Service Account JSON file.")
+            # Set up chat
+            chat = GenerativeModel("gemini-1.5-flash-001").start_chat()
+            question = st.text_input("Ask a question based on the extracted text:")
+            if st.button("Send"):
+                response = chat.send_message(
+                    [extracted_text, question],
+                    generation_config=generation_config,
+                    safety_settings=safety_settings
+                )
+                st.subheader("Chatbot Response:")
+                st.write(response)
+        else:
+            st.warning("Please upload exactly 2 PDF files.")
 
 # Safety and generation configurations
 generation_config = {
