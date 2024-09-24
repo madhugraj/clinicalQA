@@ -12,6 +12,7 @@ def init_vertex_ai():
         credentials = service_account.Credentials.from_service_account_file(
             'mlai-rnd-aiml-f785c0229f8d.json'  # Ensure this path is correct
         )
+        st.write(credentials)
         vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
     except Exception as e:
         st.error(f"Error initializing Vertex AI: {e}")
