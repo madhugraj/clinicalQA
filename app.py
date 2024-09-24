@@ -2,7 +2,6 @@ import streamlit as st
 from google.oauth2 import service_account
 import vertexai
 import PyPDF2
-import base64
 
 # Function to initialize Vertex AI
 def init_vertex_ai(): 
@@ -21,9 +20,10 @@ def upload_pdfs():
 def extract_text_from_pdfs(uploaded_files):
     extracted_text = ""
     for uploaded_file in uploaded_files:
-        with PyPDF2.PdfReader(uploaded_file) as pdf_reader:
-            for page in pdf_reader.pages:
-                extracted_text += page.extract_text() + "\n"  # Add extracted text from each page
+        # Instantiate PdfReader directly
+        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+        for page in pdf_reader.pages:
+            extracted_text += page.extract_text() + "\n"  # Add extracted text from each page
     return extracted_text
 
 # Function to query the chatbot
