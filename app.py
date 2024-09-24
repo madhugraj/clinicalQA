@@ -4,12 +4,14 @@ from vertexai.generative_models import GenerativeModel
 import vertexai.preview.generative_models as generative_models
 from google.oauth2 import service_account
 
-# Load credentials explicitly
+# Load credentials and initialize Vertex AI
 def init_vertex_ai():
     try:
+        # Load service account credentials
         credentials = service_account.Credentials.from_service_account_file(
-            'mlai-rnd-aiml-f785c0229f8d.json'  # Update with your JSON file path
+            'mlai-rnd-aiml-f785c0229f8d.json'  # Make sure the path is correct
         )
+        # Initialize Vertex AI
         vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
         st.write("Vertex AI initialized successfully.")
     except Exception as e:
@@ -61,10 +63,10 @@ generation_config = {
 }
 
 safety_settings = {
-    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.OFF,
+    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.OFF,
+    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.OFF,
+    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.OFF,
 }
 
 if __name__ == "__main__":
