@@ -1,7 +1,7 @@
 import base64
 import os
 from PyPDF2 import PdfReader, PdfWriter
-from google.colab import files
+#from google.colab import files
 import vertexai
 from vertexai.generative_models import GenerativeModel, SafetySetting, Part
 from google.oauth2 import service_account
