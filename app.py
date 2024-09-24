@@ -8,10 +8,13 @@ from google.oauth2 import service_account
 
 # Function to initialize the Vertex AI and Gemini model
 def init_vertex_ai():
-    credentials = service_account.Credentials.from_service_account_file(
-        'mlai-rnd-aiml-f785c0229f8d.json'
-    )
-    vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
+    try:
+        credentials = service_account.Credentials.from_service_account_file(
+            'mlai-rnd-aiml-f785c0229f8d.json'  # Ensure this path is correct
+        )
+        vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
+    except Exception as e:
+        st.error(f"Error initializing Vertex AI: {e}")
 
 # Function to upload PDF files
 def upload_pdfs():
