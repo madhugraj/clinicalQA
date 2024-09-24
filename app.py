@@ -9,7 +9,7 @@ def init_vertex_ai():
     try:
         # Load service account credentials
         credentials = service_account.Credentials.from_service_account_file(
-            'mlai-rnd-aiml-f785c0229f8d.json'  # Make sure the path is correct
+            'client_secret_1018231518277-j045b226q3pbgncpfu3mg33h2eofr14k.apps.googleusercontent.com.json'  # Make sure the path is correct
         )
         # Initialize Vertex AI
         vertexai.init(project="mlai-rnd-aiml", location="us-central1", credentials=credentials)
