@@ -1,4 +1,4 @@
 streamlit
 PyPDF2
 google-cloud-aiplatform
-
+gcloud auth application-default login
