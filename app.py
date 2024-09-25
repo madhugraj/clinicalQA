@@ -3,6 +3,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel
 import vertexai.preview.generative_models as generative_models
 from google.oauth2 import service_account
+gcloud auth application-default login
 
 # Load credentials and initialize Vertex AI
 def init_vertex_ai():
