@@ -3,11 +3,14 @@ import vertexai
 from vertexai.generative_models import GenerativeModel
 import vertexai.preview.generative_models as generative_models
 from google.oauth2 import service_account
-from oauth2client.client import GoogleCredentials
+from google.cloud import aiplatform
+from google.auth import credentials
 
-credentials_1 = GoogleCredentials.get_application_default()
-#credentials_1 = 'client_secret_1018231518277-j045b226q3pbgncpfu3mg33h2eofr14k.apps.googleusercontent.com.json'
-client = Client(credentials=credentials_1)
+# Path to your service account JSON file
+credentials_path = 'client_secret_1018231518277-j045b226q3pbgncpfu3mg33h2eofr14k.apps.googleusercontent.com.json'
+
+# Initialize the client
+aiplatform.init(credentials=credentials.Credentials.from_service_account_file(credentials_path))
 
 # Load credentials and initialize Vertex AI
 def init_vertex_ai():
